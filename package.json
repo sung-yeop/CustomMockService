@@ -1,0 +1,55 @@
+{
+  "name": "@sung-yeop/custom-router",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "1.0.0",
+  "description": "Custom development router utility for Next.js or React.js projects",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "npx tsx src/test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "type": "module",
+  "keywords": [
+    "logger",
+    "logging",
+    "console",
+    "development",
+    "typescript",
+    "javascript",
+    "debug"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sung-yeop/CustomRouter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sung-yeop/CustomRouter/issues"
+  },
+  "homepage": "https://github.com/sung-yeop/CustomRouter#readme",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^24.0.15",
+    "@types/react": "^18.2.45",
+    "rollup": "^4.9.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  }
+}
