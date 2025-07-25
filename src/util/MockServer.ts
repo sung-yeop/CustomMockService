@@ -1,14 +1,29 @@
 export class CustomMockServer {
   private static getMockMapping = new Map<string, any>();
+  private static isDevRun = true;
 
   static print() {
     console.log(this.getMockMapping);
   }
 
-  run() {
+  run(isDevRun: boolean = true) {
+    CustomMockServer.isDevRun = isDevRun;
+
+    if (!CustomMockServer.validate()) {
+      console.log("MockServer: 현재 환경에서는 실행되지 않습니다");
+      return;
+    }
+
     this.patchFetch();
     this.patchXHR();
     console.log("CustomMockServer is Running");
+  }
+
+  private static validate(): boolean {
+    if (this.isDevRun) {
+      return process.env.NODE_ENV === "development";
+    }
+    return true;
   }
 
   static get({
@@ -20,7 +35,7 @@ export class CustomMockServer {
     params?: any;
     returnData: any;
   }) {
-    this.getMockMapping.set(`GET:${endpoint}`, { params, returnData });
+    this.getMockMapping.set(`${endpoint}`, { params, returnData });
   }
 
   patchXHR() {
