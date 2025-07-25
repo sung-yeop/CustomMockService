@@ -36,49 +36,49 @@ export class CustomMockServer {
   static get({
     endPoint,
     params,
-    returnData,
+    response,
   }: {
     endPoint: string;
     params?: any;
-    returnData: any;
+    response: any;
   }) {
-    this.getMockMapping.set(`${endPoint}`, { params, returnData });
+    this.getMockMapping.set(`${endPoint}`, { params, response });
   }
 
   static post({
     endPoint,
-    requestBody,
-    returnData,
+    request,
+    response,
   }: {
     endPoint: string;
-    requestBody?: any;
-    returnData?: any;
+    request?: any;
+    response?: any;
   }) {
-    this.postMockMapping.set(`${endPoint}`, { requestBody, returnData });
+    this.postMockMapping.set(`${endPoint}`, { request, response });
   }
 
   static patch({
     endPoint,
-    requestBody,
-    returnData,
+    request,
+    response,
   }: {
     endPoint: string;
-    requestBody?: any;
-    returnData?: any;
+    request?: any;
+    response?: any;
   }) {
-    this.patchMockMapping.set(`${endPoint}`, { requestBody, returnData });
+    this.patchMockMapping.set(`${endPoint}`, { request, response });
   }
 
   static delete({
     endPoint,
-    requestBody,
-    returnData,
+    request,
+    response,
   }: {
     endPoint: string;
-    requestBody?: any;
-    returnData?: any;
+    request?: any;
+    response?: any;
   }) {
-    this.deleteMockMapping.set(`${endPoint}`, { requestBody, returnData });
+    this.deleteMockMapping.set(`${endPoint}`, { request, response });
   }
 
   static patchXHR() {
@@ -108,26 +108,26 @@ export class CustomMockServer {
       xhr.send = function (body?: any) {
         console.log(`XHR Send: ${method} ${url}`);
         console.log("Request Body:", body);
-        let returnData;
+        let response;
 
         switch (method) {
           case "GET":
-            returnData = CustomMockServer.getMockMapping.get(url);
+            response = CustomMockServer.getMockMapping.get(url);
             break;
           case "POST":
-            returnData = CustomMockServer.postMockMapping.get(url);
+            response = CustomMockServer.postMockMapping.get(url);
             break;
           case "PATCH":
-            returnData = CustomMockServer.patchMockMapping.get(url);
+            response = CustomMockServer.patchMockMapping.get(url);
             break;
           case "DELETE":
-            returnData = CustomMockServer.deleteMockMapping.get(url);
+            response = CustomMockServer.deleteMockMapping.get(url);
             break;
         }
 
-        if (returnData) {
+        if (response) {
           console.log("Mock 데이터 존재 O -> 가짜 응답 반환");
-          return originalSend.call(this, returnData);
+          return originalSend.call(this, response);
         }
 
         console.log("Mock 데이터 X -> 실제 요청 진행");
