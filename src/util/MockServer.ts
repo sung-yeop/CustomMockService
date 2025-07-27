@@ -149,41 +149,26 @@ export class CustomMockServer {
         if (mockData) {
           console.log("Mock 데이터 존재 O -> 가짜 응답 반환", mockData);
 
-          setTimeout(() => {
-            Object.defineProperty(xhr, "readyState", {
-              value: 4,
-              writable: false,
-            });
-            Object.defineProperty(xhr, "status", {
-              value: 200,
-              writable: false,
-            });
-            Object.defineProperty(xhr, "statusText", {
-              value: "OK",
-              writable: false,
-            });
-            Object.defineProperty(xhr, "responseText", {
-              value: JSON.stringify(mockData.response),
-              writable: false,
-            });
-            Object.defineProperty(xhr, "response", {
-              value: JSON.stringify(mockData.response),
-              writable: false,
-            });
-
-            if (xhr.onreadystatechange) {
-              xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
-            }
-            if (xhr.onload) {
-              const progressEvent = new ProgressEvent("load", {
-                lengthComputable: true,
-                loaded: JSON.stringify(mockData.response).length,
-                total: JSON.stringify(mockData.response).length,
-              });
-              xhr.onload.call(xhr, progressEvent);
-            }
-          }, 10);
-
+          Object.defineProperty(xhr, "readyState", {
+            value: 4,
+            writable: false,
+          });
+          Object.defineProperty(xhr, "status", {
+            value: 200,
+            writable: false,
+          });
+          Object.defineProperty(xhr, "statusText", {
+            value: "OK",
+            writable: false,
+          });
+          Object.defineProperty(xhr, "responseText", {
+            value: JSON.stringify(mockData.response),
+            writable: false,
+          });
+          Object.defineProperty(xhr, "response", {
+            value: JSON.stringify(mockData.response),
+            writable: false,
+          });
           return;
         }
 
