@@ -5,6 +5,31 @@ export class CustomMockServer {
   private static deleteMockMapping = new Map<string, any>();
   private static isDevRun = true;
 
+  private static getStatusText(statusCode: number): string {
+    const statusMap: Record<number, string> = {
+      200: "OK",
+      201: "Created",
+      204: "No Content",
+
+      301: "Moved Permanently",
+      302: "Found",
+      304: "Not Modified",
+
+      400: "Bad Request",
+      401: "Unauthorized",
+      403: "Forbidden",
+      404: "Not Found",
+      409: "Conflict",
+      422: "Unprocessable Entity",
+
+      500: "Internal Server Error",
+      502: "Bad Gateway",
+      503: "Service Unavailable",
+    };
+
+    return statusMap[statusCode] || "Unknown";
+  }
+
   static print() {
     console.log(this.getMockMapping);
   }
@@ -44,50 +69,58 @@ export class CustomMockServer {
 
   static get({
     endPoint,
+    status = 200,
     params = null,
     response,
   }: {
     endPoint: string;
+    status?: number;
     params?: any;
     response: any;
   }) {
-    this.getMockMapping.set(`${endPoint}`, { params, response });
+    this.getMockMapping.set(`${endPoint}`, { status, params, response });
   }
 
   static post({
     endPoint,
+    status = 200,
     request = null,
     response,
   }: {
     endPoint: string;
+    status?: number;
     request?: any;
     response: any;
   }) {
-    this.postMockMapping.set(`${endPoint}`, { request, response });
+    this.postMockMapping.set(`${endPoint}`, { status, request, response });
   }
 
   static patch({
     endPoint,
+    status = 200,
     request = null,
     response,
   }: {
     endPoint: string;
+    status?: number;
     request?: any;
     response: any;
   }) {
-    this.patchMockMapping.set(`${endPoint}`, { request, response });
+    this.patchMockMapping.set(`${endPoint}`, { status, request, response });
   }
 
   static delete({
     endPoint,
+    status = 200,
     request = null,
     response,
   }: {
     endPoint: string;
+    status?: number;
     request?: any;
     response?: any;
   }) {
-    this.deleteMockMapping.set(`${endPoint}`, { request, response });
+    this.deleteMockMapping.set(`${endPoint}`, { status, request, response });
   }
 
   static patchXHR() {
@@ -209,9 +242,12 @@ export class CustomMockServer {
         value: 4,
         configurable: true,
       });
-      Object.defineProperty(xhr, "status", { value: 200, configurable: true });
+      Object.defineProperty(xhr, "status", {
+        value: mockData.status,
+        configurable: true,
+      });
       Object.defineProperty(xhr, "statusText", {
-        value: "OK",
+        value: CustomMockServer.getStatusText(mockData.status),
         configurable: true,
       });
       Object.defineProperty(xhr, "responseText", {
