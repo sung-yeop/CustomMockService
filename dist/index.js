@@ -16,13 +16,22 @@ class CustomMockServer {
     }
     static validate() {
         if (typeof window === "undefined") {
+            console.log("MockServer 검증 실패: window가 정의되지 않음");
             return false;
         }
         const isElectron = !!window.electronAPI ||
             typeof window.require === "function" ||
             navigator.userAgent.toLowerCase().indexOf("electron") > -1;
+        console.log("MockServer 환경 검증:", {
+            isDevRun: this.isDevRun,
+            NODE_ENV: process.env.NODE_ENV,
+            isElectron: isElectron,
+            userAgent: navigator.userAgent,
+        });
         if (this.isDevRun) {
-            return process.env.NODE_ENV === "development" || isElectron;
+            const result = process.env.NODE_ENV === "development" || isElectron;
+            console.log("검증 결과:", result);
+            return result;
         }
         return true;
     }
