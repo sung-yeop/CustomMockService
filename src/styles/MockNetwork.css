@@ -1,0 +1,311 @@
+.mock-network-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  max-width: 500px;
+  height: 400px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 12px;
+  z-index: 999999;
+  transition: transform 0.3s ease;
+}
+
+.mock-network-panel.collapsed {
+  transform: translateY(calc(100% - 40px));
+}
+
+.mock-network-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #444;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mock-network-title {
+  color: #00d4aa;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.mock-network-badge {
+  background: #ff6b6b;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  margin-left: 8px;
+}
+
+.mock-network-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.mock-network-btn {
+  background: #444;
+  border: none;
+  color: #ccc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 0.2s;
+}
+
+.mock-network-btn:hover {
+  background: #555;
+}
+
+.mock-network-btn.clear {
+  background: #ff6b6b;
+  color: white;
+}
+
+.mock-network-btn.toggle {
+  background: #00d4aa;
+  color: white;
+}
+
+/* Content */
+.mock-network-content {
+  height: calc(100% - 40px);
+  overflow-y: auto;
+  background: #1a1a1a;
+}
+
+.mock-network-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-style: italic;
+}
+
+/* Request List */
+.mock-request-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.mock-request-item {
+  border-bottom: 1px solid #333;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mock-request-item:hover {
+  background: #252525;
+}
+
+.mock-request-item.selected {
+  background: #2a3f5f;
+}
+
+.mock-request-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.mock-request-method {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.mock-request-method.GET {
+  background: #61affe;
+  color: white;
+}
+.mock-request-method.POST {
+  background: #49cc90;
+  color: white;
+}
+.mock-request-method.PUT {
+  background: #fca130;
+  color: white;
+}
+.mock-request-method.DELETE {
+  background: #f93e3e;
+  color: white;
+}
+.mock-request-method.PATCH {
+  background: #50e3c2;
+  color: white;
+}
+
+.mock-request-status {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.mock-request-status.success {
+  background: #28a745;
+  color: white;
+}
+.mock-request-status.error {
+  background: #dc3545;
+  color: white;
+}
+.mock-request-status.redirect {
+  background: #ffc107;
+  color: black;
+}
+
+.mock-request-url {
+  color: #ccc;
+  font-size: 11px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mock-request-time {
+  color: #888;
+  font-size: 10px;
+}
+
+.mock-request-meta {
+  display: flex;
+  gap: 12px;
+  color: #888;
+  font-size: 10px;
+}
+
+.mock-request-duration {
+  color: #00d4aa;
+}
+
+/* Request Details */
+.mock-request-details {
+  padding: 12px;
+  background: #222;
+  border-top: 1px solid #444;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.mock-detail-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #444;
+}
+
+.mock-detail-tab {
+  background: none;
+  border: none;
+  color: #888;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+
+.mock-detail-tab.active {
+  color: #00d4aa;
+  border-bottom-color: #00d4aa;
+}
+
+.mock-detail-content {
+  color: #ccc;
+}
+
+.mock-json {
+  background: #1a1a1a;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.mock-network-content::-webkit-scrollbar,
+.mock-request-details::-webkit-scrollbar,
+.mock-json::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mock-network-content::-webkit-scrollbar-track,
+.mock-request-details::-webkit-scrollbar-track,
+.mock-json::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.mock-network-content::-webkit-scrollbar-thumb,
+.mock-request-details::-webkit-scrollbar-thumb,
+.mock-json::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+.mock-network-content::-webkit-scrollbar-thumb:hover,
+.mock-request-details::-webkit-scrollbar-thumb:hover,
+.mock-json::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+@media (max-width: 768px) {
+  .mock-network-panel {
+    max-width: 100%;
+    right: 0;
+    left: 0;
+  }
+
+  .mock-request-header {
+    flex-wrap: wrap;
+  }
+
+  .mock-request-url {
+    min-width: 0;
+  }
+}
+
+@keyframes mock-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.mock-network-badge.new {
+  animation: mock-pulse 1s ease-in-out;
+}
+
+.mock-network-panel * {
+  box-sizing: border-box;
+}
+
+.mock-network-panel *::selection {
+  background: #00d4aa;
+  color: white;
+}
