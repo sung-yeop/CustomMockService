@@ -27,8 +27,13 @@ export class CustomMockServer {
       return false;
     }
 
+    const isElectron =
+      !!(window as any).electronAPI ||
+      typeof (window as any).require === "function" ||
+      navigator.userAgent.toLowerCase().indexOf("electron") > -1;
+
     if (this.isDevRun) {
-      return process.env.NODE_ENV === "development";
+      return process.env.NODE_ENV === "development" || isElectron;
     }
     return true;
   }
