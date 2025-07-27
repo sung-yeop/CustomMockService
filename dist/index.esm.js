@@ -63,6 +63,7 @@ class CustomMockServer {
                 if (mockData) {
                     console.log("Mock 데이터 존재 O -> 가짜 응답 반환", mockData);
                     CustomMockServer.returnMockResponse(xhr, mockData);
+                    return;
                 }
                 console.log("Mock 데이터 X -> 실제 요청 진행");
                 return originalSend.call(this, body);
@@ -134,17 +135,55 @@ CustomMockServer.patchMockMapping = new Map();
 CustomMockServer.deleteMockMapping = new Map();
 CustomMockServer.isDevRun = true;
 CustomMockServer.returnMockResponse = (xhr, mockData) => {
-    Object.defineProperty(xhr, "readyState", { value: 4 });
-    Object.defineProperty(xhr, "status", { value: 200 });
-    Object.defineProperty(xhr, "responseText", {
-        value: JSON.stringify(mockData.response),
+    console.log("Mock 응답 시작 - xhr 상태:", {
+        readyState: xhr.readyState,
+        onreadystatechange: !!xhr.onreadystatechange,
+        onload: !!xhr.onload,
     });
-    if (xhr.onreadystatechange) {
-        xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
-    }
-    if (xhr.onload) {
-        xhr.onload.call(xhr, new ProgressEvent("load"));
-    }
+    setTimeout(() => {
+        Object.defineProperty(xhr, "readyState", {
+            value: 4,
+            configurable: true,
+        });
+        Object.defineProperty(xhr, "status", { value: 200, configurable: true });
+        Object.defineProperty(xhr, "statusText", {
+            value: "OK",
+            configurable: true,
+        });
+        Object.defineProperty(xhr, "responseText", {
+            value: JSON.stringify(mockData.response),
+            configurable: true,
+        });
+        Object.defineProperty(xhr, "response", {
+            value: JSON.stringify(mockData.response),
+            configurable: true,
+        });
+        console.log("Mock 응답 설정 후:", {
+            readyState: xhr.readyState,
+            status: xhr.status,
+            hasOnreadystatechange: !!xhr.onreadystatechange,
+            hasOnload: !!xhr.onload,
+        });
+        if (xhr.onreadystatechange) {
+            console.log("onreadystatechange 호출 중");
+            xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
+        }
+        else {
+            console.warn("onreadystatechange 리스너가 없음");
+        }
+        if (xhr.onload) {
+            console.log("onload 이벤트 호출 중");
+            const progressEvent = new ProgressEvent("load", {
+                lengthComputable: true,
+                loaded: JSON.stringify(mockData.response).length,
+                total: JSON.stringify(mockData.response).length,
+            });
+            xhr.onload.call(xhr, progressEvent);
+        }
+        else {
+            console.warn("onload 리스너가 없음");
+        }
+    }, 50);
 };
 
 export { CustomMockServer };
