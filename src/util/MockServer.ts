@@ -204,12 +204,6 @@ export class CustomMockServer {
   }
 
   private static returnMockResponse = (xhr: XMLHttpRequest, mockData: any) => {
-    console.log("Mock 응답 시작 - xhr 상태:", {
-      readyState: xhr.readyState,
-      onreadystatechange: !!xhr.onreadystatechange,
-      onload: !!xhr.onload,
-    });
-
     setTimeout(() => {
       Object.defineProperty(xhr, "readyState", {
         value: 4,
