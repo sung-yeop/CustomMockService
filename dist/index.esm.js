@@ -1,3 +1,6 @@
+import { jsxs, jsx } from 'react/jsx-runtime';
+import { useState, useEffect } from 'react';
+
 class CustomMockService {
     static getStatusText(statusCode) {
         const statusMap = {
@@ -217,5 +220,276 @@ CustomMockService.returnMockResponse = (xhr, mockData) => {
     }, 50);
 };
 
-export { CustomMockService };
+const styles = {
+    panel: {
+        position: "fixed",
+        bottom: 0,
+        right: 0,
+        width: "100%",
+        maxWidth: "500px",
+        height: "400px",
+        background: "#1a1a1a",
+        border: "1px solid #333",
+        borderRadius: "8px 8px 0 0",
+        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.3)",
+        fontFamily: '"Monaco", "Menlo", "Ubuntu Mono", monospace',
+        fontSize: "12px",
+        zIndex: 999999,
+        transition: "transform 0.3s ease",
+        boxSizing: "border-box",
+    },
+    panelCollapsed: {
+        transform: "translateY(calc(100% - 40px))",
+    },
+    header: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "8px 12px",
+        background: "#2d2d2d",
+        borderBottom: "1px solid #444",
+        borderRadius: "8px 8px 0 0",
+        cursor: "pointer",
+        userSelect: "none",
+    },
+    titleContainer: {
+        display: "flex",
+        alignItems: "center",
+    },
+    title: {
+        color: "#00d4aa",
+        fontWeight: "bold",
+        fontSize: "13px",
+    },
+    badge: {
+        background: "#ff6b6b",
+        color: "white",
+        padding: "2px 6px",
+        borderRadius: "10px",
+        fontSize: "10px",
+        marginLeft: "8px",
+    },
+    controls: {
+        display: "flex",
+        gap: "8px",
+    },
+    btn: {
+        background: "#444",
+        border: "none",
+        color: "#ccc",
+        padding: "4px 8px",
+        borderRadius: "4px",
+        cursor: "pointer",
+        fontSize: "11px",
+        transition: "background 0.2s",
+    },
+    btnClear: {
+        background: "#ff6b6b",
+        color: "white",
+    },
+    btnToggle: {
+        background: "#00d4aa",
+        color: "white",
+    },
+    content: {
+        height: "calc(100% - 40px)",
+        overflowY: "auto",
+        background: "#1a1a1a",
+    },
+    empty: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        color: "#666",
+        fontStyle: "italic",
+    },
+    requestList: {
+        padding: 0,
+        margin: 0,
+        listStyle: "none",
+    },
+    requestItem: {
+        borderBottom: "1px solid #333",
+        padding: "8px 12px",
+        cursor: "pointer",
+        transition: "background 0.2s",
+    },
+    requestItemSelected: {
+        background: "#2a3f5f",
+    },
+    requestHeader: {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        marginBottom: "4px",
+    },
+    method: {
+        padding: "2px 6px",
+        borderRadius: "3px",
+        fontWeight: "bold",
+        fontSize: "10px",
+        textTransform: "uppercase",
+        color: "white",
+    },
+    methodGET: { background: "#61affe" },
+    methodPOST: { background: "#49cc90" },
+    methodPUT: { background: "#fca130" },
+    methodDELETE: { background: "#f93e3e" },
+    methodPATCH: { background: "#50e3c2" },
+    status: {
+        padding: "2px 6px",
+        borderRadius: "3px",
+        fontWeight: "bold",
+        fontSize: "10px",
+    },
+    statusSuccess: { background: "#28a745", color: "white" },
+    statusError: { background: "#dc3545", color: "white" },
+    statusRedirect: { background: "#ffc107", color: "black" },
+    url: {
+        color: "#ccc",
+        fontSize: "11px",
+        flex: 1,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+    },
+    time: {
+        color: "#888",
+        fontSize: "10px",
+    },
+    meta: {
+        display: "flex",
+        gap: "12px",
+        color: "#888",
+        fontSize: "10px",
+    },
+    duration: {
+        color: "#00d4aa",
+    },
+    details: {
+        padding: "12px",
+        background: "#222",
+        borderTop: "1px solid #444",
+        maxHeight: "200px",
+        overflowY: "auto",
+    },
+    tabs: {
+        display: "flex",
+        gap: "8px",
+        marginBottom: "12px",
+        borderBottom: "1px solid #444",
+    },
+    tab: {
+        background: "none",
+        border: "none",
+        color: "#888",
+        padding: "6px 12px",
+        cursor: "pointer",
+        borderBottom: "2px solid transparent",
+        fontSize: "11px",
+        transition: "all 0.2s",
+    },
+    tabActive: {
+        color: "#00d4aa",
+        borderBottomColor: "#00d4aa",
+    },
+    detailContent: {
+        color: "#ccc",
+    },
+    json: {
+        background: "#1a1a1a",
+        padding: "8px",
+        borderRadius: "4px",
+        border: "1px solid #333",
+        fontFamily: '"Monaco", "Menlo", "Ubuntu Mono", monospace',
+        fontSize: "11px",
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-all",
+        maxHeight: "150px",
+        overflowY: "auto",
+    },
+};
+const MockNetwork = () => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [history, setHistory] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [activeTab, setActiveTab] = useState("response");
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const currentHistory = CustomMockService.getHistory();
+            setHistory(currentHistory);
+        }, 100);
+        return () => clearInterval(interval);
+    }, []);
+    const handleClear = () => {
+        CustomMockService.clearHistory();
+        setHistory([]);
+        setSelectedRequest(null);
+    };
+    const handleToggle = () => {
+        setIsCollapsed(!isCollapsed);
+    };
+    const handleRequestClick = (request) => {
+        setSelectedRequest(selectedRequest?.id === request.id ? null : request);
+    };
+    const getStatusStyle = (status) => {
+        if (status >= 200 && status < 300)
+            return { ...styles.status, ...styles.statusSuccess };
+        if (status >= 300 && status < 400)
+            return { ...styles.status, ...styles.statusRedirect };
+        return { ...styles.status, ...styles.statusError };
+    };
+    const getMethodStyle = (method) => {
+        const methodKey = `method${method}`;
+        return { ...styles.method, ...(styles[methodKey] || {}) };
+    };
+    const formatTime = (timestamp) => {
+        return new Date(timestamp).toLocaleTimeString();
+    };
+    const formatJson = (obj) => {
+        try {
+            return JSON.stringify(obj, null, 2);
+        }
+        catch {
+            return String(obj);
+        }
+    };
+    return (jsxs("div", { style: {
+            ...styles.panel,
+            ...(isCollapsed ? styles.panelCollapsed : {}),
+        }, children: [jsxs("div", { style: styles.header, onClick: handleToggle, children: [jsxs("div", { style: styles.titleContainer, children: [jsx("span", { style: styles.title, children: "Mock Network" }), history.length > 0 && (jsx("span", { style: styles.badge, children: history.length }))] }), jsxs("div", { style: styles.controls, onClick: (e) => e.stopPropagation(), children: [jsx("button", { style: { ...styles.btn, ...styles.btnClear }, onClick: handleClear, children: "Clear" }), jsx("button", { style: { ...styles.btn, ...styles.btnToggle }, children: isCollapsed ? "▲" : "▼" })] })] }), jsx("div", { style: styles.content, children: history.length === 0 ? (jsx("div", { style: styles.empty, children: "No mock requests yet" })) : (jsx("ul", { style: styles.requestList, children: history.map((request) => (jsxs("li", { children: [jsxs("div", { style: {
+                                    ...styles.requestItem,
+                                    ...(selectedRequest?.id === request.id
+                                        ? styles.requestItemSelected
+                                        : {}),
+                                    ...(selectedRequest?.id !== request.id
+                                        ? { ":hover": { background: "#252525" } }
+                                        : {}),
+                                }, onClick: () => handleRequestClick(request), onMouseEnter: (e) => {
+                                    if (selectedRequest?.id !== request.id) {
+                                        e.currentTarget.style.background = "#252525";
+                                    }
+                                }, onMouseLeave: (e) => {
+                                    if (selectedRequest?.id !== request.id) {
+                                        e.currentTarget.style.background = "transparent";
+                                    }
+                                }, children: [jsxs("div", { style: styles.requestHeader, children: [jsx("span", { style: getMethodStyle(request.method), children: request.method }), jsx("span", { style: getStatusStyle(request.status), children: request.status }), jsx("span", { style: styles.url, children: request.url }), jsx("span", { style: styles.time, children: formatTime(request.timestamp) })] }), jsxs("div", { style: styles.meta, children: [jsxs("span", { style: styles.duration, children: [request.duration, "ms"] }), jsx("span", { children: request.statusText })] })] }), selectedRequest?.id === request.id && (jsxs("div", { style: styles.details, children: [jsxs("div", { style: styles.tabs, children: [jsx("button", { style: {
+                                                    ...styles.tab,
+                                                    ...(activeTab === "response" ? styles.tabActive : {}),
+                                                }, onClick: () => setActiveTab("response"), children: "Response" }), jsx("button", { style: {
+                                                    ...styles.tab,
+                                                    ...(activeTab === "request" ? styles.tabActive : {}),
+                                                }, onClick: () => setActiveTab("request"), children: "Request" }), jsx("button", { style: {
+                                                    ...styles.tab,
+                                                    ...(activeTab === "headers" ? styles.tabActive : {}),
+                                                }, onClick: () => setActiveTab("headers"), children: "Headers" })] }), jsxs("div", { style: styles.detailContent, children: [activeTab === "response" && (jsx("div", { style: styles.json, children: formatJson(request.responseBody) })), activeTab === "request" && (jsx("div", { style: styles.json, children: request.requestBody
+                                                    ? formatJson(request.requestBody)
+                                                    : "No request body" })), activeTab === "headers" && (jsx("div", { style: styles.json, children: formatJson({
+                                                    request: request.requestHeaders || {},
+                                                    response: request.responseHeaders || {},
+                                                }) }))] })] }))] }, request.id))) })) })] }));
+};
+
+export { CustomMockService, MockNetwork };
 //# sourceMappingURL=index.esm.js.map
