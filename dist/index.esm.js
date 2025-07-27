@@ -1,3 +1,5 @@
+import { URLSearchParams } from 'url';
+
 class CustomMockServer {
     static print() {
         console.log(this.getMockMapping);
@@ -23,17 +25,8 @@ class CustomMockServer {
             console.log("MockServer 검증 실패: window가 정의되지 않음");
             return false;
         }
-        const isElectron = !!window.electronAPI ||
-            typeof window.require === "function" ||
-            navigator.userAgent.toLowerCase().indexOf("electron") > -1;
-        console.log("MockServer 환경 검증:", {
-            isDevRun: this.isDevRun,
-            NODE_ENV: process.env.NODE_ENV,
-            isElectron: isElectron,
-            userAgent: navigator.userAgent,
-        });
         if (this.isDevRun) {
-            const result = process.env.NODE_ENV === "development" || isElectron;
+            const result = process.env.NODE_ENV === "development";
             console.log("검증 결과:", result);
             return result;
         }
@@ -55,57 +48,21 @@ class CustomMockServer {
         const OriginalXHR = window.XMLHttpRequest;
         window.XMLHttpRequest = function () {
             const xhr = new OriginalXHR();
-            let method;
-            let url;
+            let httpMethod;
+            let requestUrl;
             const originalOpen = xhr.open;
             xhr.open = function (m, u, async, user, password) {
-                method = m;
-                url = u;
-                console.log(`XHR Open: ${method} ${url}`);
+                httpMethod = m;
+                requestUrl = u;
+                new URLSearchParams(new URL(u).search);
                 return originalOpen.call(this, m, u, async || true, user, password);
             };
             const originalSend = xhr.send;
             xhr.send = function (body) {
-                console.log(`XHR Send: ${method} ${url}`);
-                console.log("Request Body:", body);
-                let mockData;
-                switch (method) {
-                    case "GET":
-                        mockData = CustomMockServer.getMockMapping.get(url);
-                        break;
-                    case "POST":
-                        mockData = CustomMockServer.postMockMapping.get(url);
-                        break;
-                    case "PATCH":
-                        mockData = CustomMockServer.patchMockMapping.get(url);
-                        break;
-                    case "DELETE":
-                        mockData = CustomMockServer.deleteMockMapping.get(url);
-                        break;
-                }
+                const mockData = CustomMockServer.findMockData(httpMethod, requestUrl);
                 if (mockData) {
                     console.log("Mock 데이터 존재 O -> 가짜 응답 반환", mockData);
-                    Object.defineProperty(xhr, "readyState", {
-                        value: 4,
-                        writable: false,
-                    });
-                    Object.defineProperty(xhr, "status", {
-                        value: 200,
-                        writable: false,
-                    });
-                    Object.defineProperty(xhr, "statusText", {
-                        value: "OK",
-                        writable: false,
-                    });
-                    Object.defineProperty(xhr, "responseText", {
-                        value: JSON.stringify(mockData.response),
-                        writable: false,
-                    });
-                    Object.defineProperty(xhr, "response", {
-                        value: JSON.stringify(mockData.response),
-                        writable: false,
-                    });
-                    return;
+                    CustomMockServer.returnMockResponse(xhr, mockData);
                 }
                 console.log("Mock 데이터 X -> 실제 요청 진행");
                 return originalSend.call(this, body);
@@ -152,12 +109,43 @@ class CustomMockServer {
             return originalFetch.call(window, input, init);
         };
     }
+    static findMockData(httpMethod, requestUrl) {
+        let mapping;
+        switch (httpMethod) {
+            case "GET":
+                mapping = CustomMockServer.getMockMapping.get(requestUrl);
+                break;
+            case "POST":
+                mapping = CustomMockServer.postMockMapping.get(requestUrl);
+                break;
+            case "PATCH":
+                mapping = CustomMockServer.patchMockMapping.get(requestUrl);
+                break;
+            case "DELETE":
+                mapping = CustomMockServer.deleteMockMapping.get(requestUrl);
+                break;
+        }
+        return mapping;
+    }
 }
 CustomMockServer.getMockMapping = new Map();
 CustomMockServer.postMockMapping = new Map();
 CustomMockServer.patchMockMapping = new Map();
 CustomMockServer.deleteMockMapping = new Map();
 CustomMockServer.isDevRun = true;
+CustomMockServer.returnMockResponse = (xhr, mockData) => {
+    Object.defineProperty(xhr, "readyState", { value: 4 });
+    Object.defineProperty(xhr, "status", { value: 200 });
+    Object.defineProperty(xhr, "responseText", {
+        value: JSON.stringify(mockData.response),
+    });
+    if (xhr.onreadystatechange) {
+        xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
+    }
+    if (xhr.onload) {
+        xhr.onload.call(xhr, new ProgressEvent("load"));
+    }
+};
 
 export { CustomMockServer };
 //# sourceMappingURL=index.esm.js.map

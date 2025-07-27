@@ -1,3 +1,5 @@
+import { URLSearchParams } from "url";
+
 export class CustomMockServer {
   private static getMockMapping = new Map<string, any>();
   private static postMockMapping = new Map<string, any>();
@@ -34,20 +36,8 @@ export class CustomMockServer {
       return false;
     }
 
-    const isElectron =
-      !!(window as any).electronAPI ||
-      typeof (window as any).require === "function" ||
-      navigator.userAgent.toLowerCase().indexOf("electron") > -1;
-
-    console.log("MockServer 환경 검증:", {
-      isDevRun: this.isDevRun,
-      NODE_ENV: process.env.NODE_ENV,
-      isElectron: isElectron,
-      userAgent: navigator.userAgent,
-    });
-
     if (this.isDevRun) {
-      const result = process.env.NODE_ENV === "development" || isElectron;
+      const result = process.env.NODE_ENV === "development";
       console.log("검증 결과:", result);
       return result;
     }
@@ -107,8 +97,9 @@ export class CustomMockServer {
     (window.XMLHttpRequest as any) = function () {
       const xhr = new OriginalXHR();
 
-      let method: string;
-      let url: string;
+      let httpMethod: string;
+      let requestUrl: string;
+      let urlParams: URLSearchParams;
 
       const originalOpen = xhr.open;
       xhr.open = function (
@@ -118,58 +109,21 @@ export class CustomMockServer {
         user?: string,
         password?: string
       ) {
-        method = m;
-        url = u;
-        console.log(`XHR Open: ${method} ${url}`);
+        httpMethod = m;
+        requestUrl = u;
+        urlParams = new URLSearchParams(new URL(u).search);
 
         return originalOpen.call(this, m, u, async || true, user, password);
       };
 
       const originalSend = xhr.send;
       xhr.send = function (body?: any) {
-        console.log(`XHR Send: ${method} ${url}`);
-        console.log("Request Body:", body);
-        let mockData;
-
-        switch (method) {
-          case "GET":
-            mockData = CustomMockServer.getMockMapping.get(url);
-            break;
-          case "POST":
-            mockData = CustomMockServer.postMockMapping.get(url);
-            break;
-          case "PATCH":
-            mockData = CustomMockServer.patchMockMapping.get(url);
-            break;
-          case "DELETE":
-            mockData = CustomMockServer.deleteMockMapping.get(url);
-            break;
-        }
+        const requestBody = body; // 나중에 생각
+        const mockData = CustomMockServer.findMockData(httpMethod, requestUrl);
 
         if (mockData) {
           console.log("Mock 데이터 존재 O -> 가짜 응답 반환", mockData);
-
-          Object.defineProperty(xhr, "readyState", {
-            value: 4,
-            writable: false,
-          });
-          Object.defineProperty(xhr, "status", {
-            value: 200,
-            writable: false,
-          });
-          Object.defineProperty(xhr, "statusText", {
-            value: "OK",
-            writable: false,
-          });
-          Object.defineProperty(xhr, "responseText", {
-            value: JSON.stringify(mockData.response),
-            writable: false,
-          });
-          Object.defineProperty(xhr, "response", {
-            value: JSON.stringify(mockData.response),
-            writable: false,
-          });
-          return;
+          CustomMockServer.returnMockResponse(xhr, mockData);
         }
 
         console.log("Mock 데이터 X -> 실제 요청 진행");
@@ -229,4 +183,39 @@ export class CustomMockServer {
       return originalFetch.call(window, input, init);
     };
   }
+
+  private static findMockData(httpMethod: string, requestUrl: string) {
+    let mapping;
+
+    switch (httpMethod) {
+      case "GET":
+        mapping = CustomMockServer.getMockMapping.get(requestUrl);
+        break;
+      case "POST":
+        mapping = CustomMockServer.postMockMapping.get(requestUrl);
+        break;
+      case "PATCH":
+        mapping = CustomMockServer.patchMockMapping.get(requestUrl);
+        break;
+      case "DELETE":
+        mapping = CustomMockServer.deleteMockMapping.get(requestUrl);
+        break;
+    }
+    return mapping;
+  }
+
+  private static returnMockResponse = (xhr: XMLHttpRequest, mockData: any) => {
+    Object.defineProperty(xhr, "readyState", { value: 4 });
+    Object.defineProperty(xhr, "status", { value: 200 });
+    Object.defineProperty(xhr, "responseText", {
+      value: JSON.stringify(mockData.response),
+    });
+
+    if (xhr.onreadystatechange) {
+      xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
+    }
+    if (xhr.onload) {
+      xhr.onload.call(xhr, new ProgressEvent("load"));
+    }
+  };
 }

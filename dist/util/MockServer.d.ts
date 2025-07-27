@@ -29,5 +29,7 @@ export declare class CustomMockServer {
     }): void;
     static patchXHR(): void;
     static patchFetch(): void;
+    private static findMockData;
+    private static returnMockResponse;
 }
 //# sourceMappingURL=MockServer.d.ts.map
