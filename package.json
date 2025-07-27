@@ -1,10 +1,10 @@
 {
-  "name": "@sung-yeop/custom-router",
+  "name": "@sung-yeop/custom-mock-service",
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.3",
-  "description": "Custom development router utility for Next.js or React.js projects",
+  "version": "1.0.0",
+  "description": "Custom Mock Service",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -32,12 +32,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sung-yeop/CustomRouter.git"
+    "url": "https://github.com/sung-yeop/CustomMockService.git"
   },
   "bugs": {
-    "url": "https://github.com/sung-yeop/CustomRouter/issues"
+    "url": "https://github.com/sung-yeop/CustomMockService/issues"
   },
-  "homepage": "https://github.com/sung-yeop/CustomRouter#readme",
+  "homepage": "https://github.com/sung-yeop/CustomMockService#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
