@@ -210,50 +210,58 @@ export class CustomMockServer {
       onload: !!xhr.onload,
     });
 
-    setTimeout(() => {
-      Object.defineProperty(xhr, "readyState", {
-        value: 4,
-        configurable: true,
-      });
-      Object.defineProperty(xhr, "status", { value: 200, configurable: true });
-      Object.defineProperty(xhr, "statusText", {
-        value: "OK",
-        configurable: true,
-      });
-      Object.defineProperty(xhr, "responseText", {
-        value: JSON.stringify(mockData.response),
-        configurable: true,
-      });
-      Object.defineProperty(xhr, "response", {
-        value: JSON.stringify(mockData.response),
-        configurable: true,
-      });
+    const waitForListeners = () => {
+      if (xhr.onreadystatechange || xhr.onload) {
+        console.log("이벤트 리스너 감지 - Mock 응답 처리 시작");
 
-      console.log("Mock 응답 설정 후:", {
-        readyState: xhr.readyState,
-        status: xhr.status,
-        hasOnreadystatechange: !!xhr.onreadystatechange,
-        hasOnload: !!xhr.onload,
-      });
-
-      if (xhr.onreadystatechange) {
-        console.log("onreadystatechange 호출 중");
-        xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
-      } else {
-        console.warn("onreadystatechange 리스너가 없음");
-      }
-
-      if (xhr.onload) {
-        console.log("onload 이벤트 호출 중");
-        const progressEvent = new ProgressEvent("load", {
-          lengthComputable: true,
-          loaded: JSON.stringify(mockData.response).length,
-          total: JSON.stringify(mockData.response).length,
+        Object.defineProperty(xhr, "readyState", {
+          value: 4,
+          configurable: true,
         });
-        xhr.onload.call(xhr, progressEvent);
+        Object.defineProperty(xhr, "status", {
+          value: 200,
+          configurable: true,
+        });
+        Object.defineProperty(xhr, "statusText", {
+          value: "OK",
+          configurable: true,
+        });
+        Object.defineProperty(xhr, "responseText", {
+          value: JSON.stringify(mockData.response),
+          configurable: true,
+        });
+        Object.defineProperty(xhr, "response", {
+          value: JSON.stringify(mockData.response),
+          configurable: true,
+        });
+
+        console.log("Mock 응답 설정 후:", {
+          readyState: xhr.readyState,
+          status: xhr.status,
+          responseText: xhr.responseText?.substring(0, 100) + "...",
+        });
+
+        if (xhr.onreadystatechange) {
+          console.log("onreadystatechange 호출 중");
+          xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
+        }
+
+        if (xhr.onload) {
+          console.log("onload 이벤트 호출 중");
+          const progressEvent = new ProgressEvent("load", {
+            lengthComputable: true,
+            loaded: JSON.stringify(mockData.response).length,
+            total: JSON.stringify(mockData.response).length,
+          });
+          xhr.onload.call(xhr, progressEvent);
+        }
       } else {
-        console.warn("onload 리스너가 없음");
+        console.log("이벤트 리스너 대기 중 - 재시도");
+        setTimeout(waitForListeners, 10); // 10ms 후 재시도
       }
-    }, 50);
+    };
+
+    // 즉시 시작하되 리스너가 없으면 기다림
+    setTimeout(waitForListeners, 0);
   };
 }
