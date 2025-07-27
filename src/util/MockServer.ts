@@ -175,7 +175,12 @@ export class CustomMockServer {
               xhr.onreadystatechange.call(xhr, new Event("readystatechange"));
             }
             if (xhr.onload) {
-              xhr.onload.call(xhr, new Event("load"));
+              const progressEvent = new ProgressEvent("load", {
+                lengthComputable: true,
+                loaded: JSON.stringify(mockData.response).length,
+                total: JSON.stringify(mockData.response).length,
+              });
+              xhr.onload.call(xhr, progressEvent);
             }
           }, 10);
 
