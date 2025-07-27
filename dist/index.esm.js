@@ -1,5 +1,3 @@
-import { URLSearchParams } from 'url';
-
 class CustomMockServer {
     static print() {
         console.log(this.getMockMapping);

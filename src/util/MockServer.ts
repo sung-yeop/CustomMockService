@@ -1,5 +1,3 @@
-import { URLSearchParams } from "url";
-
 export class CustomMockServer {
   private static getMockMapping = new Map<string, any>();
   private static postMockMapping = new Map<string, any>();

@@ -1,7 +1,5 @@
 'use strict';
 
-var url = require('url');
-
 class CustomMockServer {
     static print() {
         console.log(this.getMockMapping);
@@ -56,7 +54,7 @@ class CustomMockServer {
             xhr.open = function (m, u, async, user, password) {
                 httpMethod = m;
                 requestUrl = u;
-                new url.URLSearchParams(new URL(u).search);
+                new URLSearchParams(new URL(u).search);
                 return originalOpen.call(this, m, u, async || true, user, password);
             };
             const originalSend = xhr.send;
