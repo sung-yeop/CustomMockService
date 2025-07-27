@@ -23,16 +23,16 @@ class CustomMockServer {
         }
         return true;
     }
-    static get({ endPoint, params, response, }) {
+    static get({ endPoint, params = null, response, }) {
         this.getMockMapping.set(`${endPoint}`, { params, response });
     }
-    static post({ endPoint, request, response, }) {
+    static post({ endPoint, request = null, response, }) {
         this.postMockMapping.set(`${endPoint}`, { request, response });
     }
-    static patch({ endPoint, request, response, }) {
+    static patch({ endPoint, request = null, response, }) {
         this.patchMockMapping.set(`${endPoint}`, { request, response });
     }
-    static delete({ endPoint, request, response, }) {
+    static delete({ endPoint, request = null, response, }) {
         this.deleteMockMapping.set(`${endPoint}`, { request, response });
     }
     static patchXHR() {

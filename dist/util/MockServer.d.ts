@@ -15,12 +15,12 @@ export declare class CustomMockServer {
     static post({ endPoint, request, response, }: {
         endPoint: string;
         request?: any;
-        response?: any;
+        response: any;
     }): void;
     static patch({ endPoint, request, response, }: {
         endPoint: string;
         request?: any;
-        response?: any;
+        response: any;
     }): void;
     static delete({ endPoint, request, response, }: {
         endPoint: string;
