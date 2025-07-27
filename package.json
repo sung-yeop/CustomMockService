@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Custom development router utility for Next.js or React.js projects",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
