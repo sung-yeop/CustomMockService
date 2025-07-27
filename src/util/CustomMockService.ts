@@ -1,8 +1,30 @@
-export class CustomMockServer {
-  private static getMockMapping = new Map<string, any>();
-  private static postMockMapping = new Map<string, any>();
-  private static patchMockMapping = new Map<string, any>();
-  private static deleteMockMapping = new Map<string, any>();
+interface MockResponseType {
+  status: number;
+  request?: any;
+  response: any;
+  params?: any;
+}
+
+interface MockHistoryEntry {
+  id: string;
+  timestamp: number;
+  method: string;
+  url: string;
+  requestBody?: any;
+  requestHeaders?: Record<string, string>;
+  status: number;
+  statusText: string;
+  responseBody: any;
+  responseHeaders?: Record<string, string>;
+  duration: number; // ms
+}
+
+export class CustomMockService {
+  private static getMockMapping = new Map<string, MockResponseType>();
+  private static postMockMapping = new Map<string, MockResponseType>();
+  private static patchMockMapping = new Map<string, MockResponseType>();
+  private static deleteMockMapping = new Map<string, MockResponseType>();
+  private static history: MockHistoryEntry[] = [];
   private static isDevRun = true;
 
   private static getStatusText(statusCode: number): string {
@@ -34,17 +56,51 @@ export class CustomMockServer {
     console.log(this.getMockMapping);
   }
 
-  static run(isDevRun: boolean = true) {
-    CustomMockServer.isDevRun = isDevRun;
+  static getHistory(): MockHistoryEntry[] {
+    return [...this.history];
+  }
 
-    if (!CustomMockServer.validate()) {
+  static clearHistory(): void {
+    this.history = [];
+  }
+
+  private static addToHistory(
+    method: string,
+    url: string,
+    requestBody: any,
+    mockData: MockResponseType,
+    startTime: number
+  ): void {
+    const entry: MockHistoryEntry = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      timestamp: Date.now(),
+      method,
+      url,
+      requestBody,
+      status: mockData.status,
+      statusText: this.getStatusText(mockData.status),
+      responseBody: mockData.response,
+      duration: Date.now() - startTime,
+    };
+
+    this.history.unshift(entry);
+
+    if (this.history.length > 100) {
+      this.history = this.history.slice(0, 100);
+    }
+  }
+
+  static run(isDevRun: boolean = true) {
+    CustomMockService.isDevRun = isDevRun;
+
+    if (!CustomMockService.validate()) {
       console.log("MockServer: 현재 환경에서는 실행되지 않습니다");
       return;
     }
 
     this.patchFetch();
     this.patchXHR();
-    console.log("CustomMockServer is Running");
+    console.log("CustomMockService is Running");
     console.log("등록된 Mock 데이터:", {
       GET: Array.from(this.getMockMapping.keys()),
       POST: Array.from(this.postMockMapping.keys()),
@@ -78,7 +134,11 @@ export class CustomMockServer {
     params?: any;
     response: any;
   }) {
-    this.getMockMapping.set(`${endPoint}`, { status, params, response });
+    this.getMockMapping.set(`${endPoint}`, {
+      status,
+      request: params,
+      response,
+    });
   }
 
   static post({
@@ -149,12 +209,22 @@ export class CustomMockServer {
 
       const originalSend = xhr.send;
       xhr.send = function (body?: any) {
-        const requestBody = body; // 나중에 생각
-        const mockData = CustomMockServer.findMockData(httpMethod, requestUrl);
+        const startTime = Date.now();
+        const requestBody = body;
+        const mockData = CustomMockService.findMockData(httpMethod, requestUrl);
 
         if (mockData) {
           console.log("Mock 데이터 존재 O -> 가짜 응답 반환", mockData);
-          CustomMockServer.returnMockResponse(xhr, mockData);
+
+          CustomMockService.addToHistory(
+            httpMethod,
+            requestUrl,
+            requestBody,
+            mockData,
+            startTime
+          );
+
+          CustomMockService.returnMockResponse(xhr, mockData);
           return;
         }
 
@@ -186,16 +256,16 @@ export class CustomMockServer {
       let mockData;
       switch (method) {
         case "GET":
-          mockData = CustomMockServer.getMockMapping.get(url);
+          mockData = CustomMockService.getMockMapping.get(url);
           break;
         case "POST":
-          mockData = CustomMockServer.postMockMapping.get(url);
+          mockData = CustomMockService.postMockMapping.get(url);
           break;
         case "PATCH":
-          mockData = CustomMockServer.patchMockMapping.get(url);
+          mockData = CustomMockService.patchMockMapping.get(url);
           break;
         case "DELETE":
-          mockData = CustomMockServer.deleteMockMapping.get(url);
+          mockData = CustomMockService.deleteMockMapping.get(url);
           break;
       }
 
@@ -221,16 +291,16 @@ export class CustomMockServer {
 
     switch (httpMethod) {
       case "GET":
-        mapping = CustomMockServer.getMockMapping.get(requestUrl);
+        mapping = CustomMockService.getMockMapping.get(requestUrl);
         break;
       case "POST":
-        mapping = CustomMockServer.postMockMapping.get(requestUrl);
+        mapping = CustomMockService.postMockMapping.get(requestUrl);
         break;
       case "PATCH":
-        mapping = CustomMockServer.patchMockMapping.get(requestUrl);
+        mapping = CustomMockService.patchMockMapping.get(requestUrl);
         break;
       case "DELETE":
-        mapping = CustomMockServer.deleteMockMapping.get(requestUrl);
+        mapping = CustomMockService.deleteMockMapping.get(requestUrl);
         break;
     }
     return mapping;
@@ -247,7 +317,7 @@ export class CustomMockServer {
         configurable: true,
       });
       Object.defineProperty(xhr, "statusText", {
-        value: CustomMockServer.getStatusText(mockData.status),
+        value: CustomMockService.getStatusText(mockData.status),
         configurable: true,
       });
       Object.defineProperty(xhr, "responseText", {

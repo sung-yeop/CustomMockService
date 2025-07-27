@@ -1,1 +1,1 @@
-export { CustomMockServer } from "./util/MockServer";
+export { CustomMockService } from "./util/CustomMockService";
