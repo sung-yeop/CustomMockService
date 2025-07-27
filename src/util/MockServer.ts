@@ -35,7 +35,7 @@ export class CustomMockServer {
 
   static get({
     endPoint,
-    params,
+    params = null,
     response,
   }: {
     endPoint: string;
@@ -47,31 +47,31 @@ export class CustomMockServer {
 
   static post({
     endPoint,
-    request,
+    request = null,
     response,
   }: {
     endPoint: string;
     request?: any;
-    response?: any;
+    response: any;
   }) {
     this.postMockMapping.set(`${endPoint}`, { request, response });
   }
 
   static patch({
     endPoint,
-    request,
+    request = null,
     response,
   }: {
     endPoint: string;
     request?: any;
-    response?: any;
+    response: any;
   }) {
     this.patchMockMapping.set(`${endPoint}`, { request, response });
   }
 
   static delete({
     endPoint,
-    request,
+    request = null,
     response,
   }: {
     endPoint: string;
