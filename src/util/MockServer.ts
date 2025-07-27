@@ -232,8 +232,6 @@ export class CustomMockServer {
 
       const loadendEvent = new ProgressEvent("loadend");
       if (xhr.onloadend) xhr.onloadend.call(xhr, loadendEvent);
-
-      console.log("Mock 응답 완료");
     }, 50);
   };
 }
